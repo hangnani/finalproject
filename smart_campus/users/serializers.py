@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from secondhand.models import UserProfile
+from .models import UserProfile
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # 用户注册序列化器

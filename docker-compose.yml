@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库服务
+  mysql:
+    image: mysql:5.7
+    container_name: smart_campus_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: smart_campus
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - smart_campus_network
+
+  # Django 后端服务
+  django:
+    build:
+      context: ./smart_campus
+      dockerfile: Dockerfile
+    container_name: smart_campus_django
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=smart_campus
+      - DB_USER=root
+      - DB_PASSWORD=123456
+      - SECRET_KEY=your-secret-key-here
+      - DEBUG=True
+      - JWT_SECRET_KEY=your-jwt-secret-key-here
+    volumes:
+      - ./smart_campus:/app
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - smart_campus_network
+
+  # Vue 前端服务（后续添加）
+  # vue:
+  #   build:
+  #     context: ./smart_campus_frontend
+  #     dockerfile: Dockerfile
+  #   container_name: smart_campus_vue
+  #   restart: always
+  #   depends_on:
+  #     - django
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - smart_campus_network
+
+volumes:
+  mysql_data:
+
+networks:
+  smart_campus_network:
+    driver: bridge

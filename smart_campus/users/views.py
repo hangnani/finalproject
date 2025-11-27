@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
-from secondhand.models import UserProfile
+from .models import UserProfile
 from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
