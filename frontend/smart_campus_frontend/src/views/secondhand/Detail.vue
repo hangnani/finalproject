@@ -24,7 +24,7 @@
         </div>
       </div>
       <div v-else class="loading">
-        <el-icon class="is-loading"><loading></loading></el-icon>
+        <i class="el-icon-loading"></i>
         <span>加载中...</span>
       </div>
     </el-card>
@@ -32,13 +32,8 @@
 </template>
 
 <script>
-import { Loading } from '@element-ui/icons'
-
 export default {
   name: 'SecondhandDetail',
-  components: {
-    Loading
-  },
   data() {
     return {
       product: null
