@@ -1,0 +1,62 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$lY8eU1n3Q9rT2wY5eX8cV1bN4mK7jH0gF3dS6aA9fZ2xC5vB8nM1kL4jH7gF0dS3aA6fZ9xC2vB5nM8kL1jH4gF7dS0aA3fZ6xC9vB2nM5kL8jH1gF4dS7aA0fZ3xC6vB9nM2kL5jH8gF1dS4aA7fZ0xC3vB6nM9kL2jH5gF8dS1aA4fZ7xC0vB3nM6kL9jH2gF5dS8aA1fZ4xC7vB0nM3kL6jH9gF2dS5aA8fZ1xC4vB7nM0kL3jH6gF9dS2aA5fZ8xC1vB4nM7kL0jH3gF6dS9aA2fZ5xC8vB1nM4kL7jH0gF3dS6aA9fZ2xC5vB8nM1kL4jH7gF0dS3aA6fZ9xC2vB5nM8kL1jH4gF7dS0aA3fZ6xC9vB2nM5kL8jH1gF4dS7aA0fZ3xC6vB9nM2kL5jH8gF1dS4aA7fZ0xC3vB6nM9kL2jH5gF8dS1aA4fZ7xC0vB3nM6kL9jH2gF5dS8aA1fZ4xC7vB0nM3kL6jH9gF2dS5aA8fZ1xC4vB7nM0kL3jH6gF9dS2aA5fZ8xC1vB4nM7kL0jH3gF6dS9aA2fZ5x",
+      "last_login": "2025-11-27T00:00:00Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "管理员",
+      "last_name": "",
+      "email": "admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-11-27T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.userprofile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "student_id": "admin001",
+      "phone": "13800138000",
+      "avatar": "",
+      "created_at": "2025-11-27T00:00:00Z",
+      "updated_at": "2025-11-27T00:00:00Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$lY8eU1n3Q9rT2wY5eX8cV1bN4mK7jH0gF3dS6aA9fZ2xC5vB8nM1kL4jH7gF0dS3aA6fZ9xC2vB5nM8kL1jH4gF7dS0aA3fZ6xC9vB2nM5kL8jH1gF4dS7aA0fZ3xC6vB9nM2kL5jH8gF1dS4aA7fZ0xC3vB6nM9kL2jH5gF8dS1aA4fZ7xC0vB3nM6kL9jH2gF5dS8aA1fZ4xC7vB0nM3kL6jH9gF2dS5aA8fZ1xC4vB7nM0kL3jH6gF9dS2aA5fZ8xC1vB4nM7kL0jH3gF6dS9aA2fZ5xC8vB1nM4kL7jH0gF3dS6aA9fZ2xC5vB8nM1kL4jH7gF0dS3aA6fZ9xC2vB5nM8kL1jH4gF7dS0aA3fZ6xC9vB2nM5kL8jH1gF4dS7aA0fZ3xC6vB9nM2kL5jH8gF1dS4aA7fZ0xC3vB6nM9kL2jH5gF8dS1aA4fZ7xC0vB3nM6kL9jH2gF5dS8aA1fZ4xC7vB0nM3kL6jH9gF2dS5aA8fZ1xC4vB7nM0kL3jH6gF9dS2aA5fZ8xC1vB4nM7kL0jH3gF6dS9aA2fZ5x",
+      "last_login": "2025-11-27T00:00:00Z",
+      "is_superuser": false,
+      "username": "user",
+      "first_name": "普通",
+      "last_name": "用户",
+      "email": "user@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-11-27T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.userprofile",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "student_id": "student001",
+      "phone": "13800138001",
+      "avatar": "",
+      "created_at": "2025-11-27T00:00:00Z",
+      "updated_at": "2025-11-27T00:00:00Z"
+    }
+  }
+]
