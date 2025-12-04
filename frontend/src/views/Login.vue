@@ -84,9 +84,8 @@ export default {
           this.$axios.post('/users/login/', this.loginForm)
             .then(response => {
               const { user, access: token } = response.data
-              // 保存 token 和用户信息到本地存储
-              localStorage.setItem('token', token)
-              localStorage.setItem('user', JSON.stringify(user))
+              // 保存到Vuex
+              this.$store.dispatch('login', { user, token })
               // 跳转到首页
               this.$router.push('/')
               this.$message.success('登录成功！')

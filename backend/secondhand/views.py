@@ -1,4 +1,4 @@
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, decorators
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Product, Category, ProductFavorite, ProductComment
@@ -53,13 +53,40 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(status=status)
         
         # 排序
-        sort = self.request.query_params.get('sort', '-created_at')
-        queryset = queryset.order_by(sort)
+        sort = self.request.query_params.get('sort', 'created_at')
+        # 处理前端传递的排序格式
+        if sort == 'created_at':
+            # 最新发布，按创建时间降序
+            sort_field = '-created_at'
+        elif sort == 'price_asc':
+            # 价格从低到高
+            sort_field = 'price'
+        elif sort == 'price_desc':
+            # 价格从高到低
+            sort_field = '-price'
+        else:
+            # 默认为按创建时间降序
+            sort_field = '-created_at'
+        queryset = queryset.order_by(sort_field)
         
         return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+    
+    @decorators.action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my(self, request):
+        """获取当前用户发布的商品"""
+        queryset = self.get_queryset().filter(user=request.user)
+        
+        # 应用分页
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 # 商品收藏视图
 class ProductFavoriteView(generics.GenericAPIView):

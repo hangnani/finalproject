@@ -10,7 +10,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 # 商品序列化器
 class ProductSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer(read_only=True)
+    user = UserProfileSerializer(source='user.profile', read_only=True)
     category = CategorySerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     comment_count = serializers.IntegerField(source='comments.count', read_only=True)

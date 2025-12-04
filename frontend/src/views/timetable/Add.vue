@@ -95,32 +95,46 @@ export default {
   },
   methods: {
     getCourseDetail() {
-      // 这里应该调用API获取课程详情
-      // 模拟数据
-      const course = {
-        id: this.courseId,
-        name: '高等数学',
-        teacher: '张老师',
-        day_of_week: 1,
-        start_time: '08:00',
-        end_time: '09:40',
-        location: '教1-101',
-        credit: 4
-      }
-      this.courseForm = course
+      // 调用API获取课程详情
+      this.$axios.get(`/timetable/courses/${this.courseId}/`)
+        .then(response => {
+          this.courseForm = response.data;
+        })
+        .catch(error => {
+          console.error('获取课程详情失败:', error);
+          this.$message.error('获取课程详情失败，请稍后重试');
+          this.$router.go(-1);
+        });
     },
     submitForm() {
       this.$refs.courseForm.validate((valid) => {
         if (valid) {
-          // 这里应该调用API保存课程
+          // 调用API保存课程
           if (this.isEdit) {
             // 编辑课程
-            this.$message.success('课程编辑成功')
+            this.$axios.put(`/timetable/courses/${this.courseId}/`, this.courseForm)
+              .then(response => {
+                this.$message.success('课程编辑成功')
+                this.$router.push('/timetable')
+              })
+              .catch(error => {
+                console.error('编辑课程失败:', error)
+                console.error('错误详情:', error.response)
+                this.$message.error(`编辑课程失败: ${error.response?.data?.message || '请稍后重试'}`)
+              })
           } else {
             // 添加课程
-            this.$message.success('课程添加成功')
+            this.$axios.post('/timetable/courses/', this.courseForm)
+              .then(response => {
+                this.$message.success('课程添加成功')
+                this.$router.push('/timetable')
+              })
+              .catch(error => {
+                console.error('添加课程失败:', error)
+                console.error('错误详情:', error.response)
+                this.$message.error(`添加课程失败: ${error.response?.data?.message || '请稍后重试'}`)
+              })
           }
-          this.$router.push('/timetable')
         } else {
           return false
         }

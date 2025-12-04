@@ -5,7 +5,7 @@
       <div v-if="product" class="product-detail">
         <div class="product-header">
           <h3>{{ product.name }}</h3>
-          <span class="product-price">¥{{ product.price }}</span>
+          <span class="product-price">¥{{ parseFloat(product.price).toFixed(2) }}</span>
         </div>
         <div class="product-info">
           <div class="product-basic-info">
@@ -43,19 +43,14 @@ export default {
     this.getProductDetail()
   },
   methods: {
-    getProductDetail() {
-      const productId = this.$route.params.id
-      // 这里应该调用 API 获取商品详情
-      // 暂时使用模拟数据
-      this.product = {
-        id: productId,
-        name: '《Python编程从入门到精通》',
-        price: 29.99,
-        status: 0,
-        created_at: '2025-11-27T10:30:00',
-        contact: '13800138000',
-        description: '这是一本Python编程入门书籍，内容涵盖Python基础语法、面向对象编程、Web开发等，适合初学者学习。' +
-                    '书籍保存完好，无缺页，无笔记，9成新。欢迎感兴趣的同学联系购买。'
+    async getProductDetail() {
+      try {
+        const productId = this.$route.params.id
+        const response = await this.$axios.get(`/secondhand/products/${productId}/`)
+        this.product = response.data
+      } catch (error) {
+        console.error('获取商品详情失败:', error)
+        this.$message.error('获取商品详情失败，请稍后重试')
       }
     },
     addToFavorite(productId) {

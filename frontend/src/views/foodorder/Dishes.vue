@@ -27,7 +27,7 @@
         >
           <div class="dish-image">
             <img v-if="dish.image" :src="dish.image" :alt="dish.name">
-            <div v-else class="dish-image-placeholder">{{ dish.name }}</div>
+            <div v-else class="dish-image-placeholder" :style="{ background: dish.gradient }">{{ dish.name }}</div>
             <div v-if="dish.status === 1" class="sold-out-badge">售罄</div>
           </div>
           <div class="dish-info">
@@ -64,41 +64,7 @@ export default {
       restaurantName: '餐厅名称',
       searchQuery: '',
       cartCount: 0,
-      dishes: [
-        // 模拟数据
-        {
-          id: 1,
-          name: '宫保鸡丁',
-          description: '经典川菜，鸡肉鲜嫩，花生香脆',
-          price: 18.00,
-          image: '',
-          status: 0
-        },
-        {
-          id: 2,
-          name: '鱼香肉丝',
-          description: '酸甜可口，肉质鲜嫩',
-          price: 16.00,
-          image: '',
-          status: 0
-        },
-        {
-          id: 3,
-          name: '麻婆豆腐',
-          description: '麻辣鲜香，豆腐嫩滑',
-          price: 12.00,
-          image: '',
-          status: 1
-        },
-        {
-          id: 4,
-          name: '回锅肉',
-          description: '肥而不腻，香气四溢',
-          price: 20.00,
-          image: '',
-          status: 0
-        }
-      ]
+      dishes: []
     }
   },
   computed: {
@@ -119,8 +85,241 @@ export default {
   },
   methods: {
     getRestaurantName() {
-      // 这里应该调用API获取餐厅名称
-      this.restaurantName = '学生餐厅'
+      // 根据餐厅ID获取餐厅名称和菜品
+      const restaurants = {
+        1: {
+          name: '学生餐厅',
+          dishes: [
+            {
+              id: 1,
+              name: '宫保鸡丁',
+              description: '经典川菜，鸡肉鲜嫩，花生香脆',
+              price: 18.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff6b6b, #ffa502)',
+              status: 0
+            },
+            {
+              id: 2,
+              name: '鱼香肉丝',
+              description: '酸甜可口，肉质鲜嫩',
+              price: 16.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff8c42, #ffd23f)',
+              status: 0
+            },
+            {
+              id: 3,
+              name: '麻婆豆腐',
+              description: '麻辣鲜香，豆腐嫩滑',
+              price: 12.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff4757, #ff6348)',
+              status: 1
+            },
+            {
+              id: 4,
+              name: '回锅肉',
+              description: '肥而不腻，香气四溢',
+              price: 20.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #e67e22, #d35400)',
+              status: 0
+            },
+            {
+              id: 5,
+              name: '酸辣土豆丝',
+              description: '酸辣爽口，脆嫩开胃',
+              price: 10.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff9ff3, #f368e0)',
+              status: 0
+            },
+            {
+              id: 6,
+              name: '番茄鸡蛋汤',
+              description: '清淡营养，酸甜可口',
+              price: 8.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ffda79, #ff9ff3)',
+              status: 0
+            }
+          ]
+        },
+        2: {
+          name: '教工餐厅',
+          dishes: [
+            {
+              id: 7,
+              name: '清蒸鲈鱼',
+              description: '鲜美嫩滑，营养丰富',
+              price: 48.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #74b9ff, #0984e3)',
+              status: 0
+            },
+            {
+              id: 8,
+              name: '红烧肉',
+              description: '肥而不腻，入口即化',
+              price: 32.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #a29bfe, #6c5ce7)',
+              status: 0
+            },
+            {
+              id: 9,
+              name: '龙井虾仁',
+              description: '鲜嫩Q弹，茶香浓郁',
+              price: 58.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #00b894, #00cec9)',
+              status: 0
+            },
+            {
+              id: 10,
+              name: '清炒时蔬',
+              description: '新鲜时蔬，清爽可口',
+              price: 16.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #55efc4, #81ecec)',
+              status: 0
+            },
+            {
+              id: 11,
+              name: '鲍鱼鸡汤',
+              description: '浓郁鲜美，营养滋补',
+              price: 68.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #fdcb6e, #e17055)',
+              status: 0
+            }
+          ]
+        },
+        3: {
+          name: '清真餐厅',
+          dishes: [
+            {
+              id: 12,
+              name: '清真牛肉面',
+              description: '手工拉面，牛肉鲜嫩',
+              price: 15.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #00b894, #00cec9)',
+              status: 0
+            },
+            {
+              id: 13,
+              name: '烤羊肉串',
+              description: '正宗清真风味，肉质香嫩',
+              price: 28.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #fd79a8, #e84393)',
+              status: 0
+            },
+            {
+              id: 14,
+              name: '清真手抓饭',
+              description: '新疆风味，颗粒分明',
+              price: 18.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #fdcb6e, #e17055)',
+              status: 0
+            },
+            {
+              id: 15,
+              name: '清真豆腐脑',
+              description: '嫩滑爽口，豆香浓郁',
+              price: 6.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #81ecec, #00cec9)',
+              status: 0
+            },
+            {
+              id: 16,
+              name: '清真包子',
+              description: '手工包子，馅料十足',
+              price: 12.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #a29bfe, #6c5ce7)',
+              status: 0
+            },
+            {
+              id: 17,
+              name: '清真炒面',
+              description: '筋道面条，清真配料',
+              price: 16.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #fd79a8, #e84393)',
+              status: 0
+            }
+          ]
+        },
+        4: {
+          name: '西式快餐',
+          dishes: [
+            {
+              id: 18,
+              name: '经典汉堡',
+              description: '双层牛肉，芝士浓郁',
+              price: 25.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff6b6b, #ffa502)',
+              status: 0
+            },
+            {
+              id: 19,
+              name: '香辣鸡翅',
+              description: '外酥里嫩，香辣可口',
+              price: 18.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff8c42, #ffd23f)',
+              status: 0
+            },
+            {
+              id: 20,
+              name: '薯条',
+              description: '金黄酥脆，口感绝佳',
+              price: 12.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #fdcb6e, #feca57)',
+              status: 0
+            },
+            {
+              id: 21,
+              name: '鸡肉卷',
+              description: '鲜嫩鸡肉，爽口蔬菜',
+              price: 22.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #ff9ff3, #f368e0)',
+              status: 0
+            },
+            {
+              id: 22,
+              name: '可乐',
+              description: '冰爽可口，夏日必备',
+              price: 8.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #0984e3, #74b9ff)',
+              status: 0
+            },
+            {
+              id: 23,
+              name: '冰淇淋',
+              description: '香甜浓郁，口感细腻',
+              price: 15.00,
+              image: '',
+              gradient: 'linear-gradient(135deg, #a29bfe, #fd79a8)',
+              status: 0
+            }
+          ]
+        }
+      }
+      
+      // 设置餐厅名称和菜品
+      const restaurant = restaurants[this.restaurantId] || restaurants[1]
+      this.restaurantName = restaurant.name
+      this.dishes = restaurant.dishes
     },
     getCartCount() {
       // 这里应该调用API获取购物车数量
