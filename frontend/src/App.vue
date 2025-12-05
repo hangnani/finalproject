@@ -38,11 +38,29 @@
             @select="handleMenuSelect"
           >
             <el-menu-item index="/">
-              <i class="el-icon-s-home"></i>
-              <span slot="title">首页</span>
-            </el-menu-item>
-            
-            <!-- 二手交易 -->
+            <i class="el-icon-s-home"></i>
+            <span slot="title">首页</span>
+          </el-menu-item>
+          
+          <!-- 数据看板 -->
+          <el-menu-item index="/dashboard">
+            <i class="el-icon-data-board"></i>
+            <span slot="title">数据看板</span>
+          </el-menu-item>
+          
+          <!-- 通知中心 -->
+          <el-menu-item index="/notifications">
+            <i class="el-icon-bell"></i>
+            <span slot="title">通知中心</span>
+          </el-menu-item>
+          
+          <!-- 设置 -->
+          <el-menu-item index="/settings">
+            <i class="el-icon-setting"></i>
+            <span slot="title">设置</span>
+          </el-menu-item>
+          
+          <!-- 二手交易 -->
             <el-submenu index="/secondhand">
               <template slot="title">
                 <i class="el-icon-s-goods"></i>

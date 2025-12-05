@@ -25,6 +25,11 @@ const FoodorderCart = () => import('@/views/foodorder/Cart.vue')
 const FoodorderOrders = () => import('@/views/foodorder/Orders.vue')
 const FoodorderOrderDetail = () => import('@/views/foodorder/OrderDetail.vue')
 
+// 其他组件
+const Settings = () => import('@/views/Settings.vue')
+const Notifications = () => import('@/views/Notifications.vue')
+const Dashboard = () => import('@/views/Dashboard.vue')
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -35,6 +40,9 @@ const routes = [
   // 主路由
   { path: '/', name: 'Home', component: Home, meta: { requiresAuth: true } },
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
+  { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true } },
+  { path: '/notifications', name: 'Notifications', component: Notifications, meta: { requiresAuth: true } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
   
   // 二手交易路由
   { path: '/secondhand', name: 'SecondhandList', component: SecondhandList, meta: { requiresAuth: true } },

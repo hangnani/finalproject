@@ -105,8 +105,14 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
+
 export default {
   name: 'TimetableList',
+  computed: {
+    ...mapState(['settings']),
+    ...mapGetters(['notificationSettings', 'orderReminderSettings'])
+  },
   data() {
     return {
       currentWeek: 1,
@@ -129,6 +135,8 @@ export default {
       // 课程详情对话框状态
       showCourseDetail: false,
       currentCourse: null,
+      // 课程提醒定时器
+      courseReminderTimer: null,
       // 默认课程数据
       defaultCourses: [
         // 周一课程
@@ -293,6 +301,12 @@ export default {
   mounted() {
     // 从API获取课程列表
     this.fetchCourses();
+    // 启动课程提醒定时器
+    this.startCourseReminderTimer();
+  },
+  beforeDestroy() {
+    // 停止课程提醒定时器
+    this.stopCourseReminderTimer();
   },
   watch: {
     // 监听路由变化，当从添加课程页面返回时重新获取课程列表
@@ -344,6 +358,132 @@ export default {
           this.courses = this.defaultCourses;
           // 不显示错误消息，避免影响用户体验
         });
+    },
+    // 检查课程提醒
+    checkCourseReminders() {
+      // 获取当前时间（优先使用模拟时间，如果有设置）
+      const now = new Date();
+      let currentHour = now.getHours();
+      let currentMinute = now.getMinutes();
+      const currentDay = now.getDay(); // 0-6，0是周日
+      
+      // 检查是否有设置模拟时间
+      const debugTime = localStorage.getItem('debugTime');
+      if (debugTime) {
+        // 使用模拟时间
+        const [hour, minute] = debugTime.split(':').map(Number);
+        currentHour = hour;
+        currentMinute = minute;
+      }
+      
+      // 转换为周一到周日的1-7格式
+      const dayId = currentDay === 0 ? 7 : currentDay;
+      
+      // 检查当前时间是否在用户设置的提醒时间范围内
+      const shouldRemind = this.shouldSendReminder(currentHour, currentMinute);
+      if (!shouldRemind) return;
+      
+      // 获取当前正在进行的课程
+      const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+      const ongoingCourses = this.courses.filter(course => {
+        // 转换day_of_week为数字类型
+        const courseDay = parseInt(course.day_of_week);
+        return courseDay === dayId;
+      });
+      
+      // 检查每个正在进行的课程是否即将结束
+      ongoingCourses.forEach(course => {
+        // 解析课程结束时间
+        const endTimeParts = course.end_time.split(':');
+        const endHour = parseInt(endTimeParts[0]);
+        const endMinute = parseInt(endTimeParts[1]);
+        
+        // 计算课程结束时间
+        const courseEnd = new Date();
+        courseEnd.setHours(endHour, endMinute, 0, 0);
+        
+        // 计算距离课程结束的时间（分钟）
+        const timeDiff = Math.floor((courseEnd - now) / (1000 * 60));
+        
+        // 如果课程将在1小时内结束，发送提醒
+        if (timeDiff > 0 && timeDiff <= 60) {
+          this.sendOrderReminder(course, timeDiff);
+        }
+      });
+    },
+    // 判断是否应该发送提醒
+    shouldSendReminder(currentHour, currentMinute) {
+      // 检查是否开启了点餐提醒
+      if (!this.orderReminderSettings.classReminders) return false;
+      
+      // 检查是否在工作日（周一到周五）
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // 周末只在用户开启了周末提醒时发送
+        return this.orderReminderSettings.freeTimeReminders;
+      }
+      
+      // 检查当前时间是否在用户设置的提醒时间范围内
+      const [startHour, startMin] = this.orderReminderSettings.reminderTimes[0].split(':').map(Number);
+      const [endHour, endMin] = this.orderReminderSettings.reminderTimes[1].split(':').map(Number);
+      
+      const currentTotal = currentHour * 60 + currentMinute;
+      const startTotal = startHour * 60 + startMin;
+      const endTotal = endHour * 60 + endMin;
+      
+      return currentTotal >= startTotal && currentTotal <= endTotal;
+    },
+    // 发送点餐提醒
+    sendOrderReminder(course, timeRemaining) {
+      // 使用Vuex添加通知
+      this.$store.dispatch('addNotification', {
+        title: '点餐提醒',
+        content: `您的课程《${course.name}》将在${timeRemaining}分钟后结束，是否需要提前点外卖？`,
+        type: 'order',
+        data: {
+          '课程名称': course.name,
+          '剩余时间': `${timeRemaining}分钟`,
+          '结束时间': course.end_time
+        },
+        actions: [
+          {
+            id: 1,
+            text: '去点餐',
+            type: 'primary',
+            action: 'navigate',
+            target: '/foodorder/restaurants'
+          }
+        ]
+      });
+      
+      // 如果开启了订单通知，显示提示框
+      if (this.notificationSettings.orderNotifications) {
+        this.$notify({
+          title: '点餐提醒',
+          message: `您的课程《${course.name}》将在${timeRemaining}分钟后结束，是否需要提前点外卖？`,
+          type: 'info',
+          duration: 10000,
+          showClose: true,
+          onClick: () => {
+            this.$router.push('/foodorder/restaurants');
+          }
+        });
+      }
+    },
+    // 启动课程提醒定时器
+    startCourseReminderTimer() {
+      // 每分钟检查一次
+      this.courseReminderTimer = setInterval(() => {
+        this.checkCourseReminders();
+      }, 60 * 1000);
+    },
+    // 停止课程提醒定时器
+    stopCourseReminderTimer() {
+      if (this.courseReminderTimer) {
+        clearInterval(this.courseReminderTimer);
+        this.courseReminderTimer = null;
+      }
     },
     // 显示课程详情对话框
     showCourseDetailDialog(course) {
