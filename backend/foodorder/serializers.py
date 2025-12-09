@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Restaurant, Dish, CartItem, Order, OrderItem, OrderReview
+from django.db.models import Avg
+from .models import Restaurant, Dish, CartItem, Order, OrderItem, OrderReview, OrderStatusHistory, DishReview
 from users.serializers import UserProfileSerializer
 
 # 餐厅序列化器
@@ -13,10 +14,16 @@ class RestaurantSerializer(serializers.ModelSerializer):
 # 菜品序列化器
 class DishSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer(read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True, default=0)
+    review_count = serializers.IntegerField(source='reviews.count', read_only=True, default=0)
+
+    def get_average_rating(self, obj):
+        avg = obj.reviews.aggregate(avg=Avg('rating'))['avg']
+        return float(avg) if avg else 0.0
 
     class Meta:
         model = Dish
-        fields = ['id', 'restaurant', 'name', 'description', 'price', 'image', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'restaurant', 'name', 'description', 'price', 'image', 'status', 'created_at', 'updated_at', 'average_rating', 'review_count']
 
 # 购物车项序列化器
 class CartItemSerializer(serializers.ModelSerializer):
@@ -71,18 +78,47 @@ class OrderReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'rating', 'content', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
+# 订单状态历史序列化器
+class OrderStatusHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatusHistory
+        fields = ['id', 'status', 'status_display', 'change_time', 'reason', 'created_by']
+        read_only_fields = ['id', 'change_time']
+
+# 菜品评价序列化器
+class DishReviewSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer(read_only=True)
+    
+    class Meta:
+        model = DishReview
+        fields = ['id', 'user', 'dish', 'rating', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+# 菜品评价创建序列化器
+class DishReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DishReview
+        fields = ['dish', 'rating', 'content']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+        
+    def create(self, validated_data):
+        # 自动设置当前用户
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
 # 订单序列化器
 class OrderSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
     restaurant = RestaurantSerializer(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
     review = OrderReviewSerializer(read_only=True)
+    status_history = OrderStatusHistorySerializer(many=True, read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'user', 'restaurant', 'total_price', 'status', 'status_display', 'payment_method', 'payment_method_display', 'delivery_address', 'created_at', 'updated_at', 'items', 'review']
+        fields = ['id', 'user', 'restaurant', 'total_price', 'status', 'status_display', 'payment_method', 'payment_method_display', 'delivery_address', 'created_at', 'updated_at', 'items', 'review', 'status_history']
         read_only_fields = ['user', 'total_price', 'status', 'created_at', 'updated_at']
 
 # 订单创建序列化器

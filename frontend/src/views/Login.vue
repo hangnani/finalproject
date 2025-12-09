@@ -19,6 +19,7 @@
             placeholder="请输入用户名"
             prefix-icon="el-icon-user"
             autocomplete="off"
+            @input="handleUsernameChange"
           ></el-input>
         </el-form-item>
         
@@ -31,6 +32,10 @@
             show-password
             autocomplete="off"
           ></el-input>
+        </el-form-item>
+        
+        <el-form-item>
+          <el-checkbox v-model="loginForm.rememberMe" class="remember-me">记住账号</el-checkbox>
         </el-form-item>
         
         <el-form-item>
@@ -60,7 +65,8 @@ export default {
     return {
       loginForm: {
         username: '',
-        password: ''
+        password: '',
+        rememberMe: false
       },
       loginRules: {
         username: [
@@ -72,10 +78,43 @@ export default {
           { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
         ]
       },
-      loading: false
+      loading: false,
+      // 保存的账号密码字典
+      savedCredentials: {}
     }
   },
+  created() {
+    // 从localStorage中读取保存的账号密码字典
+    this.loadSavedCredentials()
+    
+    // 设置默认勾选状态
+    this.loginForm.rememberMe = Object.keys(this.savedCredentials).length > 0
+  },
   methods: {
+    loadSavedCredentials() {
+      // 读取保存的账号密码字典
+      const saved = localStorage.getItem('savedCredentials')
+      if (saved) {
+        try {
+          this.savedCredentials = JSON.parse(saved)
+        } catch (e) {
+          console.error('解析保存的凭据失败:', e)
+          this.savedCredentials = {}
+        }
+      }
+    },
+    saveCredentials() {
+      // 保存账号密码字典到localStorage
+      localStorage.setItem('savedCredentials', JSON.stringify(this.savedCredentials))
+    },
+    handleUsernameChange() {
+      // 用户名变化时，自动填入对应的密码
+      if (this.savedCredentials[this.loginForm.username]) {
+        this.loginForm.password = this.savedCredentials[this.loginForm.username]
+      } else {
+        this.loginForm.password = ''
+      }
+    },
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
@@ -84,11 +123,34 @@ export default {
           this.$axios.post('/users/login/', this.loginForm)
             .then(response => {
               const { user, access: token } = response.data
+              
+              // 根据用户选择保存用户名和密码到字典
+              if (this.loginForm.rememberMe) {
+                // 将当前账号密码添加到保存的凭据字典中
+                this.savedCredentials[this.loginForm.username] = this.loginForm.password
+                // 保存字典到localStorage
+                this.saveCredentials()
+              } else {
+                // 移除当前账号的保存记录
+                if (this.savedCredentials[this.loginForm.username]) {
+                  delete this.savedCredentials[this.loginForm.username]
+                  this.saveCredentials()
+                }
+              }
+              
               // 保存到Vuex
               this.$store.dispatch('login', { user, token })
-              // 跳转到首页
-              this.$router.push('/')
-              this.$message.success('登录成功！')
+              
+              // 根据用户角色跳转到不同页面
+              if (user.is_admin || user.is_staff) {
+                // 管理员跳转到管理员控制台
+                this.$router.push('/admin')
+                this.$message.success('管理员登录成功！')
+              } else {
+                // 普通用户跳转到首页
+                this.$router.push('/')
+                this.$message.success('登录成功！')
+              }
             })
             .catch(error => {
               console.error('登录失败:', error)

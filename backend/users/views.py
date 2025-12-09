@@ -1,9 +1,9 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from .models import UserProfile
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserProfileSerializer, UserListSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # 用户注册视图
@@ -35,11 +35,23 @@ class UserLoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         
+        # 确保UserProfile存在
+        from .models import UserProfile
+        try:
+            profile = user.profile
+        except UserProfile.DoesNotExist:
+            # 创建默认的UserProfile
+            profile = UserProfile.objects.create(
+                user=user,
+                student_id=f'{user.username}001',
+                phone='13800138000'
+            )
+        
         # 生成 Token
         refresh = RefreshToken.for_user(user)
         
         return Response({
-            "user": UserProfileSerializer(user.profile).data,
+            "user": UserProfileSerializer(profile).data,
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }, status=status.HTTP_200_OK)
@@ -75,3 +87,14 @@ class ChangePasswordView(generics.UpdateAPIView):
         user.save()
         
         return Response({"message": "密码修改成功"}, status=status.HTTP_200_OK)
+
+# 用户视图集，用于获取所有用户（管理员专用）
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer
+    http_method_names = ['get']  # 只允许GET请求
+    
+    def get_queryset(self):
+        # 只有管理员可以查看所有用户
+        return User.objects.all()

@@ -5,7 +5,7 @@ from .models import Restaurant, Dish, CartItem, Order, OrderReview
 from .serializers import (
     RestaurantSerializer, DishSerializer, CartItemSerializer, 
     CartItemCreateUpdateSerializer, OrderSerializer, OrderCreateSerializer,
-    OrderReviewSerializer
+    OrderReviewSerializer, DishReviewSerializer, DishReviewCreateSerializer
 )
 from django.db.models import Q
 
@@ -116,6 +116,37 @@ class OrderCancelView(generics.UpdateAPIView):
             return Response(self.get_serializer(order).data)
         return Response({"error": "该订单状态不允许取消"}, status=status.HTTP_400_BAD_REQUEST)
 
+# 订单状态更新视图
+class OrderStatusUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def get_object(self):
+        order_id = self.kwargs.get('order_id')
+        try:
+            # 这里可以根据需要添加权限控制，比如只有管理员或餐厅可以更新订单状态
+            return Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            self.permission_denied(self.request)
+
+    def update(self, request, *args, **kwargs):
+        order = self.get_object()
+        new_status = request.data.get('status')
+        
+        if new_status is None:
+            return Response({"error": "请提供新的订单状态"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 检查状态是否有效
+        valid_statuses = [status[0] for status in Order.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return Response({"error": "无效的订单状态"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 更新状态
+        order.status = new_status
+        order.save()
+        
+        return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
+
 # 订单评价视图
 class OrderReviewView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -137,3 +168,31 @@ class OrderReviewView(generics.CreateAPIView):
         serializer.save(order=order)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+# 菜品评价视图集
+class DishReviewViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = DishReviewSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return DishReviewCreateSerializer
+        return DishReviewSerializer
+
+    def get_queryset(self):
+        queryset = DishReview.objects.all()
+        
+        # 按菜品过滤
+        dish_id = self.request.query_params.get('dish', None)
+        if dish_id:
+            queryset = queryset.filter(dish_id=dish_id)
+        
+        # 按用户过滤
+        user_id = self.request.query_params.get('user', None)
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

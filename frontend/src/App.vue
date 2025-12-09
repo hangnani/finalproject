@@ -17,11 +17,18 @@
           <div class="user-info">
             <el-dropdown>
               <span class="el-dropdown-link">
-                {{ user ? user.name : '未登录' }} <i class="el-icon-arrow-down el-icon--right"></i>
+                {{ user ? user.name : '未登录' }}
+                <el-tag v-if="isAdmin" type="danger" size="small" class="user-type-tag">
+                  超级管理员
+                </el-tag>
+                <el-tag v-else-if="isStaff" type="warning" size="small" class="user-type-tag">
+                  管理员
+                </el-tag>
+                <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click="$router.push('/profile')">个人中心</el-dropdown-item>
-                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item @click.native="$router.push('/profile')">个人中心</el-dropdown-item>
+                <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -37,61 +44,94 @@
             router
             @select="handleMenuSelect"
           >
-            <el-menu-item index="/">
-            <i class="el-icon-s-home"></i>
-            <span slot="title">首页</span>
-          </el-menu-item>
-          
-          <!-- 数据看板 -->
-          <el-menu-item index="/dashboard">
-            <i class="el-icon-data-board"></i>
-            <span slot="title">数据看板</span>
-          </el-menu-item>
-          
-          <!-- 通知中心 -->
-          <el-menu-item index="/notifications">
-            <i class="el-icon-bell"></i>
-            <span slot="title">通知中心</span>
-          </el-menu-item>
-          
-          <!-- 设置 -->
-          <el-menu-item index="/settings">
-            <i class="el-icon-setting"></i>
-            <span slot="title">设置</span>
-          </el-menu-item>
-          
-          <!-- 二手交易 -->
-            <el-submenu index="/secondhand">
-              <template slot="title">
-                <i class="el-icon-s-goods"></i>
-                <span>二手交易</span>
-              </template>
-              <el-menu-item index="/secondhand">商品列表</el-menu-item>
-              <el-menu-item index="/secondhand/publish">发布商品</el-menu-item>
-              <el-menu-item index="/secondhand/my-products">我的发布</el-menu-item>
-            </el-submenu>
+            <!-- 管理员菜单 -->
+            <template v-if="isAdmin || isStaff">
+              <el-menu-item index="/admin">
+                <i class="el-icon-s-home"></i>
+                <span slot="title">管理员控制台</span>
+              </el-menu-item>
+              
+              <!-- 管理员功能菜单 -->
+              <el-submenu index="/admin">
+                <template slot="title">
+                  <i class="el-icon-document-add"></i>
+                  <span>数据录入</span>
+                </template>
+                <el-menu-item index="/admin/lectures">讲座管理</el-menu-item>
+                <el-menu-item index="/admin/exams">考试管理</el-menu-item>
+                <el-menu-item index="/admin/restaurants">餐厅管理</el-menu-item>
+              </el-submenu>
+              
+              <el-submenu index="/admin/users">
+                <template slot="title">
+                  <i class="el-icon-user"></i>
+                  <span>用户管理</span>
+                </template>
+                <el-menu-item index="/admin/users">用户列表</el-menu-item>
+              </el-submenu>
+              
+              
+            </template>
             
-            <!-- 课程表管理 -->
-            <el-submenu index="/timetable">
-              <template slot="title">
-                <i class="el-icon-document"></i>
-                <span>课程表</span>
-              </template>
-              <el-menu-item index="/timetable">我的课程</el-menu-item>
-              <el-menu-item index="/timetable/add">添加课程</el-menu-item>
-              <el-menu-item index="/timetable/import">导入课程</el-menu-item>
-            </el-submenu>
-            
-            <!-- 校园点餐 -->
-            <el-submenu index="/foodorder">
-              <template slot="title">
-                <i class="el-icon-s-shop"></i>
-                <span>校园点餐</span>
-              </template>
-              <el-menu-item index="/foodorder/restaurants">餐厅列表</el-menu-item>
-              <el-menu-item index="/foodorder/cart">购物车</el-menu-item>
-              <el-menu-item index="/foodorder/orders">我的订单</el-menu-item>
-            </el-submenu>
+            <!-- 普通用户菜单 -->
+            <template v-else>
+              <el-menu-item index="/">
+                <i class="el-icon-s-home"></i>
+                <span slot="title">首页</span>
+              </el-menu-item>
+              
+              <!-- 数据看板 -->
+              <el-menu-item index="/dashboard">
+                <i class="el-icon-data-board"></i>
+                <span slot="title">数据看板</span>
+              </el-menu-item>
+              
+              <!-- 通知中心 -->
+              <el-menu-item index="/notifications">
+                <i class="el-icon-bell"></i>
+                <span slot="title">通知中心</span>
+              </el-menu-item>
+              
+              <!-- 二手交易 -->
+              <el-submenu index="/secondhand">
+                <template slot="title">
+                  <i class="el-icon-s-goods"></i>
+                  <span>二手交易</span>
+                </template>
+                <el-menu-item index="/secondhand">商品列表</el-menu-item>
+                <el-menu-item index="/secondhand/publish">发布商品</el-menu-item>
+                <el-menu-item index="/secondhand/my-products">我的发布</el-menu-item>
+                <el-menu-item index="/secondhand/messages">交易消息</el-menu-item>
+              </el-submenu>
+              
+              <!-- 课程表管理 -->
+              <el-submenu index="/timetable">
+                <template slot="title">
+                  <i class="el-icon-document"></i>
+                  <span>课程表</span>
+                </template>
+                <el-menu-item index="/timetable">我的课程</el-menu-item>
+                <el-menu-item index="/timetable/add">添加课程</el-menu-item>
+                <el-menu-item index="/timetable/import">导入课程</el-menu-item>
+              </el-submenu>
+              
+              <!-- 校园点餐 -->
+              <el-submenu index="/foodorder">
+                <template slot="title">
+                  <i class="el-icon-s-shop"></i>
+                  <span>校园点餐</span>
+                </template>
+                <el-menu-item index="/foodorder/restaurants">餐厅列表</el-menu-item>
+                <el-menu-item index="/foodorder/cart">购物车</el-menu-item>
+                <el-menu-item index="/foodorder/orders">我的订单</el-menu-item>
+              </el-submenu>
+              
+              <!-- 设置 -->
+              <el-menu-item index="/settings">
+                <i class="el-icon-setting"></i>
+                <span slot="title">个人设置</span>
+              </el-menu-item>
+            </template>
           </el-menu>
         </el-aside>
         
@@ -116,6 +156,12 @@ export default {
     },
     isDarkMode() {
       return this.$store.getters.isDarkMode
+    },
+    isAdmin() {
+      return this.$store.getters.isAdmin
+    },
+    isStaff() {
+      return this.$store.getters.isStaff
     }
   },
   created() {
@@ -123,16 +169,53 @@ export default {
     this.initUser()
     // 监听系统主题变化
     this.initTheme()
+    
+    // 调试信息
+    console.log('=== App Created ===')
+    console.log('User from localStorage:', JSON.parse(localStorage.getItem('user')))
+    console.log('User from Vuex:', this.$store.state.user)
+    console.log('Is Admin:', this.isAdmin)
+    console.log('Is Staff:', this.isStaff)
   },
   methods: {
     handleMenuSelect(key, keyPath) {
       // 菜单选择由路由自动处理
     },
     logout() {
-      // 使用Vuex logout action
-      this.$store.dispatch('logout')
-      // 跳转到登录页
+      console.log('=== 开始执行退出登录 ===')
+      
+      // 1. 打印当前状态
+      console.log('退出前 - localStorage.user:', localStorage.getItem('user'))
+      console.log('退出前 - localStorage.token:', localStorage.getItem('token'))
+      console.log('退出前 - Vuex user:', this.$store.state.user)
+      console.log('退出前 - Vuex token:', this.$store.state.token)
+      
+      // 2. 清除本地存储中的所有相关数据
+      console.log('开始清除 localStorage...')
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      console.log('清除后 - localStorage.user:', localStorage.getItem('user'))
+      console.log('清除后 - localStorage.token:', localStorage.getItem('token'))
+      
+      // 3. 清除 Vuex 状态
+      console.log('开始清除 Vuex 状态...')
+      this.$store.commit('LOGOUT')
+      console.log('清除后 - Vuex user:', this.$store.state.user)
+      console.log('清除后 - Vuex token:', this.$store.state.token)
+      
+      // 4. 跳转到登录页
+      console.log('准备跳转到登录页...')
       this.$router.push('/login')
+      console.log('跳转命令已执行')
+      
+      // 5. 打印最终状态
+      setTimeout(() => {
+        console.log('最终状态 - localStorage.user:', localStorage.getItem('user'))
+        console.log('最终状态 - localStorage.token:', localStorage.getItem('token'))
+        console.log('最终状态 - Vuex user:', this.$store.state.user)
+        console.log('最终状态 - Vuex token:', this.$store.state.token)
+        console.log('=== 退出登录执行完毕 ===')
+      }, 500)
     },
     // 切换主题
     toggleTheme() {
@@ -215,6 +298,11 @@ export default {
 
 .user-info {
   cursor: pointer;
+}
+
+.user-type-tag {
+  margin: 0 5px;
+  vertical-align: middle;
 }
 
 .aside {

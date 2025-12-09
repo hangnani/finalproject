@@ -1,8 +1,13 @@
 from rest_framework import generics, status, viewsets, decorators
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Product, Category, ProductFavorite, ProductComment
-from .serializers import ProductSerializer, ProductCreateUpdateSerializer, CategorySerializer, ProductFavoriteSerializer, ProductCommentSerializer
+from .models import Product, Category, ProductFavorite, ProductComment, Transaction, TransactionReview
+from .serializers import (
+    ProductSerializer, ProductCreateUpdateSerializer, CategorySerializer, 
+    ProductFavoriteSerializer, ProductCommentSerializer,
+    TransactionSerializer, TransactionCreateSerializer,
+    TransactionReviewSerializer, TransactionReviewCreateSerializer
+)
 from django.db.models import Q
 
 # 商品分类视图集
@@ -145,3 +150,47 @@ class ProductCommentView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         product_id = self.kwargs.get('product_id')
         serializer.save(product_id=product_id, user=self.request.user)
+
+# 交易记录视图集
+class TransactionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TransactionSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return TransactionCreateSerializer
+        return TransactionSerializer
+
+    def get_queryset(self):
+        # 获取当前用户
+        user = self.request.user
+        # 查询当前用户参与的所有交易
+        queryset = Transaction.objects.filter(Q(buyer=user) | Q(seller=user))
+        # 按更新时间倒序排序
+        queryset = queryset.order_by('-updated_at')
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+# 交易评价视图集
+class TransactionReviewViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TransactionReviewSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return TransactionReviewCreateSerializer
+        return TransactionReviewSerializer
+
+    def get_queryset(self):
+        # 获取当前用户
+        user = self.request.user
+        # 查询当前用户给出或收到的所有评价
+        queryset = TransactionReview.objects.filter(Q(reviewer=user) | Q(reviewed=user))
+        # 按创建时间倒序排序
+        queryset = queryset.order_by('-created_at')
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(reviewer=self.request.user)

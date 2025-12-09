@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'timetable',
     'foodorder',
     'users',
+    'chat',
 ]
 
 MIDDLEWARE = [

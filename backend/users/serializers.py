@@ -63,13 +63,42 @@ class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
     name = serializers.SerializerMethodField()
+    is_admin = serializers.BooleanField(source='user.is_superuser')
+    is_staff = serializers.BooleanField(source='user.is_staff')
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'username', 'email', 'name', 'student_id', 'phone', 'avatar']
+        fields = ['id', 'username', 'email', 'name', 'student_id', 'phone', 'avatar', 'is_admin', 'is_staff']
 
     def get_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
+
+# User列表序列化器（用于管理员查看用户列表）
+class UserListSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    student_id = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    is_admin = serializers.BooleanField(source='is_superuser')
+    is_staff = serializers.BooleanField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'name', 'student_id', 'phone', 'is_admin', 'is_staff']
+
+    def get_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+    
+    def get_student_id(self, obj):
+        try:
+            return obj.profile.student_id
+        except UserProfile.DoesNotExist:
+            return ''
+    
+    def get_phone(self, obj):
+        try:
+            return obj.profile.phone
+        except UserProfile.DoesNotExist:
+            return ''
 
 # Token 序列化器
 class TokenSerializer(serializers.Serializer):

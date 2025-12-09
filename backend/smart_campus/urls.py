@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/secondhand/', include('secondhand.urls')),
     path('api/timetable/', include('timetable.urls')),
     path('api/foodorder/', include('foodorder.urls')),
+    path('api/chat/', include('chat.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]

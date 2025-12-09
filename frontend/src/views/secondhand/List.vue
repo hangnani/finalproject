@@ -60,6 +60,10 @@
           </div>
           <div class="product-info">
             <h3 class="product-name">{{ product.name }}</h3>
+            <div class="product-seller">
+              <span class="seller-label">发布者：</span>
+              <span class="seller-name">{{ product.user?.username || product.seller || '未知用户' }}</span>
+            </div>
             <div class="product-meta">
               <span class="product-price">¥{{ parseFloat(product.price).toFixed(2) }}</span>
               <span class="product-date">{{ formatTime(product.created_at) }}</span>
@@ -157,7 +161,8 @@ export default {
           price: 29.99,
           status: 0,
           created_at: '2025-11-27T10:30:00',
-          image: 'https://picsum.photos/200/150?random=1'
+          image: 'https://picsum.photos/200/150?random=1',
+          seller: 'ershou1'
         },
         {
           id: 9992,
@@ -165,7 +170,8 @@ export default {
           price: 19.99,
           status: 0,
           created_at: '2025-11-26T14:20:00',
-          image: 'https://picsum.photos/200/150?random=2'
+          image: 'https://picsum.photos/200/150?random=2',
+          seller: 'ershou2'
         },
         {
           id: 9993,
@@ -173,7 +179,8 @@ export default {
           price: 89.99,
           status: 1,
           created_at: '2025-11-25T09:15:00',
-          image: 'https://picsum.photos/200/150?random=3'
+          image: 'https://picsum.photos/200/150?random=3',
+          seller: 'ershou3'
         },
         {
           id: 9994,
@@ -181,7 +188,8 @@ export default {
           price: 49.99,
           status: 0,
           created_at: '2025-11-24T16:45:00',
-          image: 'https://picsum.photos/200/150?random=4'
+          image: 'https://picsum.photos/200/150?random=4',
+          seller: 'ershou1'
         },
         {
           id: 9995,
@@ -189,7 +197,8 @@ export default {
           price: 39.99,
           status: 0,
           created_at: '2025-11-23T11:20:00',
-          image: 'https://picsum.photos/200/150?random=5'
+          image: 'https://picsum.photos/200/150?random=5',
+          seller: 'ershou2'
         },
         {
           id: 9996,
@@ -197,7 +206,8 @@ export default {
           price: 24.99,
           status: 0,
           created_at: '2025-11-22T18:30:00',
-          image: 'https://picsum.photos/200/150?random=6'
+          image: 'https://picsum.photos/200/150?random=6',
+          seller: 'ershou3'
         }
       ]
       
@@ -229,7 +239,7 @@ export default {
     viewDetail(productId) {
       this.$router.push(`/secondhand/detail/${productId}`)
     },
-    addToFavorite(productId) {
+    addToFavorite() {
       this.$message.success('收藏成功！')
     },
     handleSizeChange(val) {
@@ -364,6 +374,21 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+.product-seller {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.seller-label {
+  font-weight: normal;
+}
+
+.seller-name {
+  font-weight: bold;
+  color: #409eff;
 }
 
 .product-meta {

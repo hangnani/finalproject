@@ -79,7 +79,7 @@ export default {
     viewDetail(productId) {
       this.$router.push(`/secondhand/detail/${productId}`)
     },
-    editProduct(productId) {
+    editProduct() {
       // 编辑商品逻辑
       this.$message.info('编辑功能开发中...')
     },

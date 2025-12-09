@@ -5,155 +5,158 @@
     </div>
     
     <el-tabs v-model="activeTab" class="settings-tabs">
-      <!-- 通知设置 -->
-      <el-tab-pane label="通知设置" name="notifications">
-        <el-card shadow="hover" class="setting-card">
-          <h3 class="setting-title">通知偏好</h3>
-          <el-form :model="notificationSettings" label-position="top" class="settings-form">
-            <!-- 课程提醒 -->
-            <el-form-item label="课程提醒">
-              <el-switch v-model="notificationSettings.courseReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">课程开始前15分钟提醒</div>
-            </el-form-item>
-            
-            <!-- 外卖订单状态通知 -->
-            <el-form-item label="外卖订单通知">
-              <el-switch v-model="notificationSettings.orderNotifications" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">订单状态更新时通知</div>
-            </el-form-item>
-            
-            <!-- 二手交易消息 -->
-            <el-form-item label="二手交易消息">
-              <el-switch v-model="notificationSettings.secondhandMessages" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">收到新消息时通知</div>
-            </el-form-item>
-            
-            <!-- 积分变动通知 -->
-            <el-form-item label="积分变动通知">
-              <el-switch v-model="notificationSettings.pointNotifications" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">积分变动时通知</div>
-            </el-form-item>
-          </el-form>
-        </el-card>
-        
-        <el-card shadow="hover" class="setting-card mt-20">
-          <h3 class="setting-title">点餐提醒设置</h3>
-          <el-form :model="orderReminderSettings" label-position="top" class="settings-form">
-            <!-- 上课中提醒点餐 -->
-            <el-form-item label="上课中提醒点餐">
-              <el-switch v-model="orderReminderSettings.classReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">课程结束前1小时提醒点餐</div>
-            </el-form-item>
-            
-            <!-- 没课时提醒点餐 -->
-            <el-form-item label="没课时提醒点餐">
-              <el-switch v-model="orderReminderSettings.freeTimeReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
-              <div class="setting-description">饭点时间提醒点餐</div>
-            </el-form-item>
-            
-            <!-- 提醒时间设置 -->
-            <el-form-item label="提醒时间" v-if="orderReminderSettings.freeTimeReminders">
-              <el-time-picker
-                v-model="orderReminderSettings.reminderTimes"
-                range
-                placeholder="选择提醒时间范围"
-                @change="saveSettings"
-                class="time-picker"
-              ></el-time-picker>
-              <div class="setting-description">没课时的提醒时间段</div>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-tab-pane>
-      
-      <!-- 饮食偏好 -->
-      <el-tab-pane label="饮食偏好" name="diet">
-        <el-card shadow="hover" class="setting-card">
-          <h3 class="setting-title">饮食禁忌</h3>
-          <el-form :model="dietSettings" label-position="top" class="settings-form">
-            <el-form-item label="忌口食材">
-              <el-select
-                v-model="dietSettings.tabooIngredients"
-                multiple
-                filterable
-                allow-create
-                default-first-option
-                placeholder="选择或输入忌口食材"
-                @change="saveSettings"
-                class="select-input"
-              >
-                <el-option label="辣椒" value="辣椒"></el-option>
-                <el-option label="香菜" value="香菜"></el-option>
-                <el-option label="葱" value="葱"></el-option>
-                <el-option label="姜" value="姜"></el-option>
-                <el-option label="蒜" value="蒜"></el-option>
-                <el-option label="海鲜" value="海鲜"></el-option>
-                <el-option label="牛肉" value="牛肉"></el-option>
-                <el-option label="羊肉" value="羊肉"></el-option>
-              </el-select>
-              <div class="setting-description">选择您的忌口食材，系统将在推荐时避开</div>
-            </el-form-item>
-            
-            <!-- 饮食类型偏好 -->
-            <el-form-item label="饮食类型偏好">
-              <el-checkbox-group v-model="dietSettings.preferredTypes" @change="saveSettings">
-                <el-checkbox label="素食"></el-checkbox>
-                <el-checkbox label="肉食"></el-checkbox>
-                <el-checkbox label="清淡"></el-checkbox>
-                <el-checkbox label="重口味"></el-checkbox>
-                <el-checkbox label="健康餐"></el-checkbox>
-                <el-checkbox label="快餐"></el-checkbox>
-              </el-checkbox-group>
-              <div class="setting-description">选择您偏好的饮食类型</div>
-            </el-form-item>
-            
-            <!-- 价格偏好 -->
-            <el-form-item label="价格偏好">
-              <el-slider
-                v-model="dietSettings.pricePreference"
-                :min="1"
-                :max="5"
-                :marks="{ 1: '实惠', 2: '', 3: '适中', 4: '', 5: '高端' }"
-                @change="saveSettings"
-              ></el-slider>
-              <div class="setting-description">选择您的价格偏好，影响推荐排序</div>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-tab-pane>
-      
-      <!-- 积分设置 -->
-      <el-tab-pane label="积分设置" name="points">
-        <el-card shadow="hover" class="setting-card">
-          <h3 class="setting-title">积分说明</h3>
-          <div class="points-info">
-            <p>• 点外卖：每消费1元获得1积分</p>
-            <p>• 发布二手商品：发布成功获得5积分，成交后获得20积分</p>
-            <p>• 购买二手商品：每消费1元获得1积分</p>
-            <p>• 邀请好友：成功邀请获得50积分</p>
-          </div>
+      <!-- 普通用户设置 -->
+      <template v-if="!isAdmin && !isStaff">
+        <!-- 通知设置 -->
+        <el-tab-pane label="通知设置" name="notifications">
+          <el-card shadow="hover" class="setting-card">
+            <h3 class="setting-title">通知偏好</h3>
+            <el-form :model="notificationSettings" label-position="top" class="settings-form">
+              <!-- 课程提醒 -->
+              <el-form-item label="课程提醒">
+                <el-switch v-model="notificationSettings.courseReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">课程开始前15分钟提醒</div>
+              </el-form-item>
+              
+              <!-- 外卖订单状态通知 -->
+              <el-form-item label="外卖订单通知">
+                <el-switch v-model="notificationSettings.orderNotifications" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">订单状态更新时通知</div>
+              </el-form-item>
+              
+              <!-- 二手交易消息 -->
+              <el-form-item label="二手交易消息">
+                <el-switch v-model="notificationSettings.secondhandMessages" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">收到新消息时通知</div>
+              </el-form-item>
+              
+              <!-- 积分变动通知 -->
+              <el-form-item label="积分变动通知">
+                <el-switch v-model="notificationSettings.pointNotifications" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">积分变动时通知</div>
+              </el-form-item>
+            </el-form>
+          </el-card>
           
-          <h3 class="setting-title mt-20">积分兑换</h3>
-          <div class="rewards-list">
-            <el-card v-for="reward in rewards" :key="reward.id" class="reward-card" shadow="hover">
-              <div class="reward-content">
-                <div class="reward-info">
-                  <h4>{{ reward.name }}</h4>
-                  <p>{{ reward.description }}</p>
+          <el-card shadow="hover" class="setting-card mt-20">
+            <h3 class="setting-title">点餐提醒设置</h3>
+            <el-form :model="orderReminderSettings" label-position="top" class="settings-form">
+              <!-- 上课中提醒点餐 -->
+              <el-form-item label="上课中提醒点餐">
+                <el-switch v-model="orderReminderSettings.classReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">课程结束前1小时提醒点餐</div>
+              </el-form-item>
+              
+              <!-- 没课时提醒点餐 -->
+              <el-form-item label="没课时提醒点餐">
+                <el-switch v-model="orderReminderSettings.freeTimeReminders" active-text="开启" inactive-text="关闭" @change="saveSettings"></el-switch>
+                <div class="setting-description">饭点时间提醒点餐</div>
+              </el-form-item>
+              
+              <!-- 提醒时间设置 -->
+              <el-form-item label="提醒时间" v-if="orderReminderSettings.freeTimeReminders">
+                <el-time-picker
+                  v-model="orderReminderSettings.reminderTimes"
+                  range
+                  placeholder="选择提醒时间范围"
+                  @change="saveSettings"
+                  class="time-picker"
+                ></el-time-picker>
+                <div class="setting-description">没课时的提醒时间段</div>
+              </el-form-item>
+            </el-form>
+          </el-card>
+        </el-tab-pane>
+        
+        <!-- 饮食偏好 -->
+        <el-tab-pane label="饮食偏好" name="diet">
+          <el-card shadow="hover" class="setting-card">
+            <h3 class="setting-title">饮食禁忌</h3>
+            <el-form :model="dietSettings" label-position="top" class="settings-form">
+              <el-form-item label="忌口食材">
+                <el-select
+                  v-model="dietSettings.tabooIngredients"
+                  multiple
+                  filterable
+                  allow-create
+                  default-first-option
+                  placeholder="选择或输入忌口食材"
+                  @change="saveSettings"
+                  class="select-input"
+                >
+                  <el-option label="辣椒" value="辣椒"></el-option>
+                  <el-option label="香菜" value="香菜"></el-option>
+                  <el-option label="葱" value="葱"></el-option>
+                  <el-option label="姜" value="姜"></el-option>
+                  <el-option label="蒜" value="蒜"></el-option>
+                  <el-option label="海鲜" value="海鲜"></el-option>
+                  <el-option label="牛肉" value="牛肉"></el-option>
+                  <el-option label="羊肉" value="羊肉"></el-option>
+                </el-select>
+                <div class="setting-description">选择您的忌口食材，系统将在推荐时避开</div>
+              </el-form-item>
+              
+              <!-- 饮食类型偏好 -->
+              <el-form-item label="饮食类型偏好">
+                <el-checkbox-group v-model="dietSettings.preferredTypes" @change="saveSettings">
+                  <el-checkbox label="素食"></el-checkbox>
+                  <el-checkbox label="肉食"></el-checkbox>
+                  <el-checkbox label="清淡"></el-checkbox>
+                  <el-checkbox label="重口味"></el-checkbox>
+                  <el-checkbox label="健康餐"></el-checkbox>
+                  <el-checkbox label="快餐"></el-checkbox>
+                </el-checkbox-group>
+                <div class="setting-description">选择您偏好的饮食类型</div>
+              </el-form-item>
+              
+              <!-- 价格偏好 -->
+              <el-form-item label="价格偏好">
+                <el-slider
+                  v-model="dietSettings.pricePreference"
+                  :min="1"
+                  :max="5"
+                  :marks="{ 1: '实惠', 2: '', 3: '适中', 4: '', 5: '高端' }"
+                  @change="saveSettings"
+                ></el-slider>
+                <div class="setting-description">选择您的价格偏好，影响推荐排序</div>
+              </el-form-item>
+            </el-form>
+          </el-card>
+        </el-tab-pane>
+        
+        <!-- 积分设置 -->
+        <el-tab-pane label="积分设置" name="points">
+          <el-card shadow="hover" class="setting-card">
+            <h3 class="setting-title">积分说明</h3>
+            <div class="points-info">
+              <p>• 点外卖：每消费1元获得1积分</p>
+              <p>• 发布二手商品：发布成功获得5积分，成交后获得20积分</p>
+              <p>• 购买二手商品：每消费1元获得1积分</p>
+              <p>• 邀请好友：成功邀请获得50积分</p>
+            </div>
+            
+            <h3 class="setting-title mt-20">积分兑换</h3>
+            <div class="rewards-list">
+              <el-card v-for="reward in rewards" :key="reward.id" class="reward-card" shadow="hover">
+                <div class="reward-content">
+                  <div class="reward-info">
+                    <h4>{{ reward.name }}</h4>
+                    <p>{{ reward.description }}</p>
+                  </div>
+                  <div class="reward-action">
+                    <span class="point-cost">{{ reward.points }}积分</span>
+                    <el-button type="primary" @click="exchangeReward(reward)" :disabled="userPoints < reward.points">
+                      {{ userPoints < reward.points ? '积分不足' : '立即兑换' }}
+                    </el-button>
+                  </div>
                 </div>
-                <div class="reward-action">
-                  <span class="point-cost">{{ reward.points }}积分</span>
-                  <el-button type="primary" @click="exchangeReward(reward)" :disabled="userPoints < reward.points">
-                    {{ userPoints < reward.points ? '积分不足' : '立即兑换' }}
-                  </el-button>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </el-card>
-      </el-tab-pane>
+              </el-card>
+            </div>
+          </el-card>
+        </el-tab-pane>
+      </template>
       
-      <!-- 关于 -->
+      <!-- 关于页面（所有用户可见） -->
       <el-tab-pane label="关于" name="about">
         <el-card shadow="hover" class="setting-card">
           <div class="about-content">
@@ -166,7 +169,7 @@
         </el-card>
       </el-tab-pane>
       
-      <!-- 调试设置 -->
+      <!-- 调试设置（所有用户可见） -->
       <el-tab-pane label="调试设置" name="debug">
         <el-card shadow="hover" class="setting-card">
           <h3 class="setting-title">点餐提醒调试</h3>
@@ -215,7 +218,7 @@ export default {
   name: 'Settings',
   computed: {
     ...mapState(['settings', 'userPoints']),
-    ...mapGetters(['notificationSettings', 'orderReminderSettings', 'dietSettings'])
+    ...mapGetters(['notificationSettings', 'orderReminderSettings', 'dietSettings', 'isAdmin', 'isStaff'])
   },
   data() {
     return {

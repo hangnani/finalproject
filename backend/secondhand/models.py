@@ -68,3 +68,63 @@ class ProductComment(models.Model):
 
     def __str__(self):
         return f'{self.user.username} 在 {self.product.name} 下留言'
+
+# 交易记录模型
+class Transaction(models.Model):
+    # 交易相关的商品
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='transactions', verbose_name='交易商品')
+    # 买家和卖家
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='buyer_transactions', verbose_name='买家')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller_transactions', verbose_name='卖家')
+    # 交易状态
+    STATUS_CHOICES = (
+        (0, '待确认'),
+        (1, '已确认'),
+        (2, '已完成'),
+        (3, '已取消'),
+    )
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0, verbose_name='交易状态')
+    # 交易价格（允许与商品价格不同，比如议价）
+    transaction_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='交易价格')
+    # 交易创建和更新时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        verbose_name = '交易记录'
+        verbose_name_plural = '交易记录'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.buyer.username} 购买 {self.product.name} 的交易记录'
+
+# 交易评价模型
+class TransactionReview(models.Model):
+    # 所属交易
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='reviews', verbose_name='所属交易')
+    # 评价者
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_reviews', verbose_name='评价者')
+    # 被评价者
+    reviewed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_reviews', verbose_name='被评价者')
+    # 评价类型（买家评价卖家或卖家评价买家）
+    REVIEW_TYPE_CHOICES = (
+        (0, '买家评价卖家'),
+        (1, '卖家评价买家'),
+    )
+    review_type = models.IntegerField(choices=REVIEW_TYPE_CHOICES, verbose_name='评价类型')
+    # 评价内容
+    content = models.TextField(blank=True, verbose_name='评价内容')
+    # 评分（1-5星）
+    rating = models.IntegerField(verbose_name='评分（1-5）')
+    # 评价创建时间
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='评价时间')
+
+    class Meta:
+        verbose_name = '交易评价'
+        verbose_name_plural = '交易评价'
+        ordering = ['-created_at']
+        # 确保每个交易中每个用户只能评价一次
+        unique_together = ('transaction', 'reviewer', 'reviewed')
+
+    def __str__(self):
+        return f'{self.reviewer.username} 对 {self.reviewed.username} 的评价'

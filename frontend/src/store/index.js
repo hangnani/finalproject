@@ -43,6 +43,8 @@ export default new Vuex.Store({
     isLoggedIn: state => !!state.token,
     currentUser: state => state.user,
     isDarkMode: state => state.theme === 'dark',
+    isAdmin: state => state.user && state.user.is_admin,
+    isStaff: state => state.user && state.user.is_staff,
     cartCount: state => state.cart.reduce((total, item) => total + item.quantity, 0),
     cartTotal: state => state.cart.reduce((total, item) => total + (item.price * item.quantity), 0),
     // 通知相关getters
@@ -67,10 +69,10 @@ export default new Vuex.Store({
     },
     // 退出登录
     LOGOUT(state) {
+      // 清除 Vuex 状态
       state.user = null
       state.token = null
-      localStorage.removeItem('user')
-      localStorage.removeItem('token')
+      // 不需要重复清除 localStorage，因为在 App.vue 中已经清除了
     },
     // 切换主题
     TOGGLE_THEME(state) {
