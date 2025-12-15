@@ -9,14 +9,16 @@
       <!-- 消息列表 -->
       <div class="message-list" ref="messageList">
         <div v-for="message in messages" :key="message.id" class="message-item">
-          <div 
-            :class="[
-              'message-bubble',
-              message.sender === currentUser ? 'message-sent' : 'message-received'
-            ]"
-          >
-            <div class="message-content">{{ message.content }}</div>
+          <div class="message-wrapper">
             <div class="message-time">{{ formatTime(message.created_at) }}</div>
+            <div 
+              :class="[
+                'message-bubble',
+                message.sender === currentUser ? 'message-sent' : 'message-received'
+              ]"
+            >
+              <div class="message-content">{{ message.content }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -87,12 +89,20 @@ export default {
         const response = await this.$axios.post(`/chat/conversations/${this.conversationId}/messages/`, messageData)
         
         // 添加新消息到列表
-        this.messages.push(response.data)
+        const newMessage = response.data
+        // 确保新消息包含created_at字段，如果没有则添加当前时间
+        if (!newMessage.created_at) {
+          newMessage.created_at = new Date().toISOString()
+        }
+        this.messages.push(newMessage)
         this.newMessage = ''
         
         this.$nextTick(() => {
           this.scrollToBottom()
         })
+        
+        // 重新获取消息列表，确保所有消息都包含完整的时间信息
+        this.fetchMessages()
       } catch (error) {
         console.error('发送消息失败:', error)
         this.$message.error('发送消息失败，请稍后重试')
@@ -175,13 +185,32 @@ export default {
 }
 
 .message-item {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: flex-start;
 }
 
 .message-item.message-sent {
   justify-content: flex-end;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message-item.message-sent .message-wrapper {
+  align-items: flex-end;
+}
+
+.message-time {
+  font-size: 12px;
+  opacity: 0.6;
+  text-align: center;
+  margin-bottom: 6px;
+  color: #666;
+  width: 100%;
 }
 
 .message-bubble {
@@ -191,10 +220,11 @@ export default {
   position: relative;
   word-wrap: break-word;
   word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .message-received {
-  background-color: #f5f7fa;
+  background-color: #ffffff;
   border: 1px solid #ebeef5;
   border-top-left-radius: 0;
 }
@@ -206,14 +236,8 @@ export default {
 }
 
 .message-content {
-  margin-bottom: 5px;
   line-height: 1.5;
-}
-
-.message-time {
-  font-size: 12px;
-  opacity: 0.7;
-  text-align: right;
+  font-size: 14px;
 }
 
 .message-input-area {
